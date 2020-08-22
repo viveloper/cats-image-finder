@@ -1,39 +1,66 @@
 class Keywords {
+  #el;
+  #state;
+  #props;
+
   constructor(props) {
-    this.el = document.querySelector('.keywords');
-    this.props = props;
-
-    this.handleKeywordClick = this.handleKeywordClick.bind(this);
-    this.el.addEventListener('click', this.handleKeywordClick);
-
-    this.render();
+    this.#el = document.querySelector('.keywords');
+    this.#el.addEventListener('click', this.#handleKeywordClick.bind(this));
+    this.#props = props;
+    this.#state = {
+      keywords: [],
+      keywordIndex: -1,
+    };
+    this.#render();
   }
 
-  handleKeywordClick(e) {
+  #setState(state) {
+    this.#state = state;
+    this.#render();
+  }
+
+  #handleKeywordClick(e) {
     this.props.onKeywordClick(e.target.dataset.keyword);
   }
 
-  render() {
-    this.el.style.display = 'block';
-    const $ul = document.createElement('ul');
-    this.el.appendChild($ul);
-    $ul.innerHTML = this.props.keywords
-      .map(
-        (keyword) =>
-          `<li class="keyword-item" data-keyword="${keyword}">${keyword}</li>`
-      )
-      .join('');
-    $ul.querySelectorAll('li').forEach(($li, index) => {
-      if (index === this.props.keywordIndex) {
-        $li.classList.add('active');
-      }
+  #render() {
+    console.log('render Keywords');
+
+    if (!this.#state.keywords || this.#state.keywords.length === 0) {
+      this.#el.style.display = 'none';
+      this.#el.innerHTML = '';
+    } else {
+      this.#el.innerHTML = '';
+      this.#el.style.display = 'block';
+      const $ul = document.createElement('ul');
+      this.#el.appendChild($ul);
+      $ul.innerHTML = this.#state.keywords
+        .map(
+          (keyword) =>
+            `<li class="keyword-item" data-keyword="${keyword}">${keyword}</li>`
+        )
+        .join('');
+      $ul.querySelectorAll('li').forEach(($li, index) => {
+        if (index === this.#state.keywordIndex) {
+          $li.classList.add('active');
+        }
+      });
+    }
+  }
+
+  // public method
+  setKeywords(keywords) {
+    this.#setState({
+      ...this.#state,
+      keywords,
     });
   }
 
-  clear() {
-    this.el.style.display = 'none';
-    this.el.innerHTML = '';
-    this.el.removeEventListener('click', this.handleKeywordClick);
+  setKeywordIndex(index) {
+    this.#setState({
+      ...this.#state,
+      keywordIndex: index,
+    });
   }
 }
 
