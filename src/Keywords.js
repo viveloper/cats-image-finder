@@ -18,13 +18,22 @@ class Keywords {
     const $ul = document.createElement('ul');
     this.el.appendChild($ul);
     $ul.innerHTML = this.props.keywords
-      .map((keyword) => `<li data-keyword="${keyword}">${keyword}</li>`)
+      .map(
+        (keyword) =>
+          `<li class="keyword-item" data-keyword="${keyword}">${keyword}</li>`
+      )
       .join('');
+    $ul.querySelectorAll('li').forEach(($li, index) => {
+      if (index === this.props.keywordIndex) {
+        $li.classList.add('active');
+      }
+    });
   }
 
   clear() {
     this.el.style.display = 'none';
     this.el.innerHTML = '';
+    this.el.removeEventListener('click', this.handleKeywordClick);
   }
 }
 
