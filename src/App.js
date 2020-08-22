@@ -19,6 +19,10 @@ class App {
 
     this.#KeywordComponent = new Keyword({
       onKeywordChange: this.#handleKeywordChange.bind(this),
+      onKeywordsClear: this.#clearKeywords.bind(this),
+      onArrowDown: this.#handleArrowDown.bind(this),
+      onArrowUp: this.#handleArrowUp.bind(this),
+      onSearch: this.#search.bind(this),
     });
     this.#KeywordsComponent = new Keywords({
       onKeywordClick: this.#handleKeywordClick.bind(this),
@@ -32,6 +36,30 @@ class App {
     this.#render();
   }
 
+  #handleArrowDown() {
+    const nextIndex =
+      this.#state.keywordIndex + 1 < this.#state.keywords.length
+        ? this.#state.keywordIndex + 1
+        : this.#state.keywordIndex;
+    this.#setState({
+      ...this.#state,
+      keywordIndex: nextIndex,
+    });
+  }
+
+  #handleArrowUp() {
+    const prevIndex =
+      this.#state.keywordIndex - 1 >= 0 ? this.#state.keywordIndex - 1 : -1;
+    this.#setState({
+      ...this.#state,
+      keywordIndex: prevIndex,
+    });
+  }
+
+  #search(keyword) {
+    console.log('search', keyword);
+  }
+
   async #handleKeywordChange(keyword) {
     if (keyword === '') {
       this.#clearKeywords();
@@ -42,11 +70,13 @@ class App {
       this.#setState({
         ...this.#state,
         keywords,
+        keywordIndex: -1,
       });
     } catch (error) {
       this.#setState({
         ...this.#state,
         keywords: [],
+        keywordIndex: -1,
       });
     }
   }
