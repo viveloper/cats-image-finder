@@ -1,66 +1,68 @@
 class Keywords {
-  #el;
-  #state;
-  #props;
-
   constructor(props) {
-    this.#el = document.querySelector('.keywords');
-    this.#el.addEventListener('click', this.#handleKeywordClick.bind(this));
-    this.#props = props;
-    this.#state = {
-      keywords: [],
+    this.el = document.querySelector('.keywords');
+    this.props = props;
+    this.state = {
+      keywords: {
+        loading: false,
+        data: null,
+        error: null,
+      },
       keywordIndex: -1,
     };
-    this.#render();
+    this.el.addEventListener('click', this.handleKeywordClick.bind(this));
+    this.render();
   }
 
-  #setState(state) {
-    this.#state = state;
-    this.#render();
-  }
-
-  #handleKeywordClick(e) {
+  handleKeywordClick(e) {
     this.props.onKeywordClick(e.target.dataset.keyword);
   }
 
-  #render() {
-    console.log('render Keywords');
+  setKeywords(keywords) {
+    this.state.keywords = keywords;
+  }
 
-    if (!this.#state.keywords || this.#state.keywords.length === 0) {
-      this.#el.style.display = 'none';
-      this.#el.innerHTML = '';
+  setKeywordIndex(index) {
+    this.state.keywordIndex = index;
+  }
+
+  incrementKeywordIndex() {
+    const nextIndex =
+      this.state.keywordIndex + 1 < this.state.keywords.data.length
+        ? this.state.keywordIndex + 1
+        : this.state.keywordIndex;
+
+    this.state.keywordIndex = nextIndex;
+  }
+
+  decrementKeywordIndex() {
+    const prevIndex =
+      this.state.keywordIndex - 1 >= 0 ? this.state.keywordIndex - 1 : -1;
+
+    this.state.keywordIndex = prevIndex;
+  }
+
+  render() {
+    if (!this.state.keywords.data || this.state.keywords.data.length === 0) {
+      this.el.style.display = 'none';
+      this.el.innerHTML = '';
     } else {
-      this.#el.innerHTML = '';
-      this.#el.style.display = 'block';
+      this.el.innerHTML = '';
+      this.el.style.display = 'block';
       const $ul = document.createElement('ul');
-      this.#el.appendChild($ul);
-      $ul.innerHTML = this.#state.keywords
+      this.el.appendChild($ul);
+      $ul.innerHTML = this.state.keywords.data
         .map(
           (keyword) =>
             `<li class="keyword-item" data-keyword="${keyword}">${keyword}</li>`
         )
         .join('');
       $ul.querySelectorAll('li').forEach(($li, index) => {
-        if (index === this.#state.keywordIndex) {
+        if (index === this.state.keywordIndex) {
           $li.classList.add('active');
         }
       });
     }
-  }
-
-  // public method
-  setKeywords(keywords) {
-    this.#setState({
-      ...this.#state,
-      keywords,
-    });
-  }
-
-  setKeywordIndex(index) {
-    this.#setState({
-      ...this.#state,
-      keywordIndex: index,
-    });
   }
 }
 
