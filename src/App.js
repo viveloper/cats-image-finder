@@ -8,6 +8,7 @@ class App {
   #state;
   #KeywordComponent;
   #KeywordsComponent;
+  #SearchResultsComponent;
 
   constructor() {
     this.#el = document.querySelector('.app');
@@ -15,6 +16,11 @@ class App {
     this.#state = {
       keywords: [],
       keywordIndex: -1,
+      searchResults: {
+        loading: false,
+        data: null,
+        error: null,
+      },
     };
 
     this.#KeywordComponent = new Keyword({
@@ -27,6 +33,7 @@ class App {
     this.#KeywordsComponent = new Keywords({
       onKeywordClick: this.#handleKeywordClick.bind(this),
     });
+    this.#SearchResultsComponent = new SearchResults();
 
     this.#render();
   }
@@ -56,8 +63,40 @@ class App {
     });
   }
 
-  #search(keyword) {
-    console.log('search', keyword);
+  async #search(keyword) {
+    if (this.#state.keywordIndex >= 0) {
+      keyword = this.#state.keywords[this.#state.keywordIndex];
+    }
+
+    this.#setState({
+      ...this.#state,
+      searchResults: {
+        loading: true,
+        data: [],
+        error: null,
+      },
+    });
+
+    try {
+      const data = await fetchResults(keyword);
+      this.#setState({
+        ...this.#state,
+        searchResults: {
+          loading: false,
+          data,
+          error: null,
+        },
+      });
+    } catch (error) {
+      this.#setState({
+        ...this.#state,
+        searchResults: {
+          loading: false,
+          data: null,
+          error,
+        },
+      });
+    }
   }
 
   async #handleKeywordChange(keyword) {
@@ -97,6 +136,7 @@ class App {
     console.log('render App');
     this.#KeywordsComponent.setKeywords(this.#state.keywords);
     this.#KeywordsComponent.setKeywordIndex(this.#state.keywordIndex);
+    this.#SearchResultsComponent.setSearchResults(this.#state.searchResults);
   }
 }
 
