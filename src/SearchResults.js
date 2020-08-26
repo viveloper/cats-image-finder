@@ -1,16 +1,21 @@
-class SearchResults {
-  constructor(props) {
-    this.el = document.querySelector('.search-results');
-    this.props = props;
-    this.state = {
+import Component from './Component.js';
+
+class SearchResults extends Component {
+  constructor() {
+    const el = document.querySelector('.search-results');
+    const initialState = {
       searchResults: {
         loading: false,
         data: null,
         error: null,
       },
     };
+    super(el, initialState);
+    this.bindEvents();
     this.render();
   }
+
+  bindEvents() {}
 
   setSearchResults(searchResults) {
     this.state.searchResults = searchResults;

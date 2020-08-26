@@ -1,8 +1,9 @@
-class Keywords {
-  constructor(props) {
-    this.el = document.querySelector('.keywords');
-    this.props = props;
-    this.state = {
+import Component from './Component.js';
+
+class Keywords extends Component {
+  constructor() {
+    const el = document.querySelector('.keywords');
+    const initialState = {
       keywords: {
         loading: false,
         data: null,
@@ -10,12 +11,17 @@ class Keywords {
       },
       keywordIndex: -1,
     };
-    this.el.addEventListener('click', this.handleKeywordClick.bind(this));
+    super(el, initialState);
+    this.bindEvents();
     this.render();
   }
 
+  bindEvents() {
+    this.on('click', this.handleKeywordClick.bind(this));
+  }
+
   handleKeywordClick(e) {
-    this.props.onKeywordClick(e.target.dataset.keyword);
+    this.emit('@keywordClick', e.target.dataset.keyword);
   }
 
   setKeywords(keywords) {

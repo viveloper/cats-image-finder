@@ -1,25 +1,32 @@
-import Keyword from './Keyword.js';
-import Keywords from './Keywords.js';
-import SearchResults from './SearchResults.js';
+import Component from './Component.js';
+import KeywordComponent from './Keyword.js';
+import KeywordsComponent from './Keywords.js';
+import SearchResultsComponent from './SearchResults.js';
 import { fetchKeywords, fetchResults } from './api.js';
 
-class App {
+class App extends Component {
   constructor() {
-    this.el = document.querySelector('.app');
+    const el = document.querySelector('.app');
+    super(el);
 
-    this.KeywordComponent = new Keyword({
-      onKeywordChange: this.handleKeywordChange.bind(this),
-      onKeywordsClear: this.clearKeywords.bind(this),
-      onArrowDown: this.handleArrowDown.bind(this),
-      onArrowUp: this.handleArrowUp.bind(this),
-      onEnterKeyup: this.handleEnterKeyup.bind(this),
-    });
-    this.KeywordsComponent = new Keywords({
-      onKeywordClick: this.handleKeywordClick.bind(this),
-    });
-    this.SearchResultsComponent = new SearchResults();
+    this.Keyword = new KeywordComponent();
+    this.Keywords = new KeywordsComponent();
+    this.SearchResults = new SearchResultsComponent();
 
-    this.el.addEventListener('click', this.handleClick.bind(this));
+    this.bindEvents();
+    this.render();
+  }
+
+  bindEvents() {
+    this.on('click', this.handleClick.bind(this));
+
+    this.Keyword.on('@keywordClear', this.clearKeywords.bind(this));
+    this.Keyword.on('@enterKeyup', this.handleEnterKeyup.bind(this));
+    this.Keyword.on('@arrowDown', this.handleArrowDown.bind(this));
+    this.Keyword.on('@arrowUp', this.handleArrowUp.bind(this));
+    this.Keyword.on('@keywordChange', this.handleKeywordChange.bind(this));
+
+    this.Keywords.on('@keywordClick', this.handleKeywordClick.bind(this));
   }
 
   handleClick(e) {
@@ -32,49 +39,52 @@ class App {
   }
 
   handleArrowDown() {
-    if (!this.KeywordsComponent.state.keywords.data) {
-      this.handleKeywordChange(this.KeywordComponent.state.keyword);
+    if (!this.Keywords.state.keywords.data) {
+      this.searchKeywords(this.Keyword.state.keyword);
       return;
     }
-    this.KeywordsComponent.incrementKeywordIndex();
-    this.KeywordsComponent.render();
+    this.Keywords.incrementKeywordIndex();
+    this.Keywords.render();
   }
 
   handleArrowUp() {
-    this.KeywordsComponent.decrementKeywordIndex();
-    this.KeywordsComponent.render();
+    this.Keywords.decrementKeywordIndex();
+    this.Keywords.render();
   }
 
-  handleEnterKeyup(keyword) {
-    const keywordIndex = this.KeywordsComponent.state.keywordIndex;
-    const keywords = this.KeywordsComponent.state.keywords.data;
+  handleEnterKeyup(e) {
+    let keyword = e.detail;
+    const keywordIndex = this.Keywords.state.keywordIndex;
+    const keywords = this.Keywords.state.keywords.data;
     if (keywordIndex >= 0) {
       keyword = keywords[keywordIndex];
     }
     this.searchResults(keyword);
     this.clearKeywords();
-    this.KeywordComponent.setKeyword(keyword);
-    this.KeywordComponent.render();
+    this.Keyword.setKeyword(keyword);
+    this.Keyword.render();
   }
 
-  handleKeywordClick(keyword) {
+  handleKeywordClick(e) {
+    const keyword = e.detail;
     this.searchResults(keyword);
     this.clearKeywords();
-    this.KeywordComponent.setKeyword(keyword);
-    this.KeywordComponent.render();
+    this.Keyword.setKeyword(keyword);
+    this.Keyword.render();
   }
 
   clearKeywords() {
-    this.KeywordsComponent.setKeywords({
+    this.Keywords.setKeywords({
       loading: false,
       data: null,
       error: null,
     });
-    this.KeywordsComponent.setKeywordIndex(-1);
-    this.KeywordsComponent.render();
+    this.Keywords.setKeywordIndex(-1);
+    this.Keywords.render();
   }
 
-  handleKeywordChange(keyword) {
+  handleKeywordChange(e) {
+    const keyword = e.detail;
     if (keyword === '') {
       this.clearKeywords();
       return;
@@ -84,59 +94,62 @@ class App {
   }
 
   async searchKeywords(keyword) {
-    this.KeywordsComponent.setKeywords({
+    if (keyword === '') return;
+    this.Keywords.setKeywords({
       loading: true,
       data: null,
       error: null,
     });
-    this.KeywordsComponent.render();
+    this.Keywords.render();
 
     try {
       const keywords = await fetchKeywords(keyword);
-      this.KeywordsComponent.setKeywords({
+      this.Keywords.setKeywords({
         loading: false,
         data: keywords,
         error: null,
       });
-      this.KeywordsComponent.setKeywordIndex(-1);
-      this.KeywordsComponent.render();
+      this.Keywords.setKeywordIndex(-1);
+      this.Keywords.render();
     } catch (error) {
-      this.KeywordsComponent.setKeywords({
+      this.Keywords.setKeywords({
         loading: false,
         data: null,
         error: error.message,
       });
-      this.KeywordsComponent.setKeywordIndex(-1);
-      this.KeywordsComponent.render();
+      this.Keywords.setKeywordIndex(-1);
+      this.Keywords.render();
     }
   }
 
   async searchResults(keyword) {
     if (!keyword) return;
-    this.SearchResultsComponent.setSearchResults({
+    this.SearchResults.setSearchResults({
       loading: true,
       data: null,
       error: null,
     });
-    this.SearchResultsComponent.render();
+    this.SearchResults.render();
 
     try {
       const data = await fetchResults(keyword);
-      this.SearchResultsComponent.setSearchResults({
+      this.SearchResults.setSearchResults({
         loading: false,
         data,
         error: null,
       });
-      this.SearchResultsComponent.render();
+      this.SearchResults.render();
     } catch (error) {
-      this.SearchResultsComponent.setSearchResults({
+      this.SearchResults.setSearchResults({
         loading: false,
         data: null,
         error: error.message,
       });
-      this.SearchResultsComponent.render();
+      this.SearchResults.render();
     }
   }
+
+  render() {}
 }
 
 export default App;

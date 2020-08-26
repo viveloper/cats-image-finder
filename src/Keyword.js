@@ -1,12 +1,18 @@
-class Keyword {
-  constructor(props) {
-    this.el = document.querySelector('.keyword');
-    this.props = props;
-    this.state = {
+import Component from './Component.js';
+
+class Keyword extends Component {
+  constructor() {
+    const el = document.querySelector('.keyword');
+    const initialState = {
       keyword: '',
     };
-    this.el.addEventListener('keyup', this.handleKeyup.bind(this));
+    super(el, initialState);
+    this.bindEvents();
     this.render();
+  }
+
+  bindEvents() {
+    this.on('keyup', this.handleKeyup.bind(this));
   }
 
   handleKeyup(e) {
@@ -14,18 +20,18 @@ class Keyword {
     const { key } = e;
 
     if (key === 'Escape') {
-      this.props.onKeywordsClear();
+      this.emit('@keywordClear');
     } else if (key === 'Enter') {
-      this.props.onEnterKeyup(value);
+      this.emit('@enterKeyup', value);
     } else if (key === 'ArrowDown') {
-      this.props.onArrowDown();
+      this.emit('@arrowDown');
     } else if (key === 'ArrowUp') {
-      this.props.onArrowUp();
+      this.emit('@arrowUp');
     } else {
       if (this.state.keyword === value) return;
       this.setKeyword(value);
       this.render();
-      this.props.onKeywordChange(value);
+      this.emit('@keywordChange', value);
     }
   }
 
